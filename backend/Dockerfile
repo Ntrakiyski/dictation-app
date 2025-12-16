@@ -39,5 +39,4 @@ COPY --from=builder /app/dist ./dist
 EXPOSE 3000
 
 # Start server
-CMD ["node", "dist/backend/src/server.js"]
-
+CMD ["node", "dist/src/server.js"]
