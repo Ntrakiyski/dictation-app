@@ -17,17 +17,5 @@ contextBridge.exposeInMainWorld("electron", {
   clipboard: {
     writeText: (text: string) => ipcRenderer.invoke("clipboard:writeText", text),
   },
-  database: {
-    saveTranscription: (data: {
-      text: string;
-      duration: number;
-      cost: number;
-      timestamp: Date;
-      date?: string;
-    }) => ipcRenderer.invoke("db:saveTranscription", data),
-    getHistoryDays: () => ipcRenderer.invoke("db:getHistoryDays"),
-    getTranscriptionsByDay: (date: string) =>
-      ipcRenderer.invoke("db:getTranscriptionsByDay", date),
-  },
 });
 

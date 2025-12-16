@@ -1,39 +1,31 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { StatusIndicator } from "./components/StatusIndicator";
 import { HistorySidebar } from "./components/HistorySidebar";
 import { HistoryView } from "./components/HistoryView";
+import { RecordButton } from "./components/RecordButton";
 import { AudioRecorder } from "./utils/audioRecorder";
-import { transcribeAudio } from "./services/apiClient";
+import { transcribeAudio, saveTranscription } from "./services/apiClient";
 import { copyToClipboard } from "./utils/clipboard";
-import { HotkeyManager } from "./utils/hotkeyManager";
 import { playSuccessSound } from "./utils/soundNotification";
-import { saveTranscription } from "./services/historyService";
 import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
 import { Clock, DollarSign, CheckCircle2 } from "lucide-react";
-import type { RecordingState, TranscriptionResult, ViewMode } from "./types";
+import type {
+  RecordingState,
+  TranscriptionResult,
+  ViewMode,
+} from "@voice-clipboard/shared/types";
 
 function App() {
   const [status, setStatus] = useState<RecordingState>("idle");
   const [audioRecorder] = useState(() => new AudioRecorder());
-  const [hotkeyManager] = useState(() => new HotkeyManager());
-  const [transcriptionResult, setTranscriptionResult] = useState<TranscriptionResult | null>(null);
+  const [transcriptionResult, setTranscriptionResult] =
+    useState<TranscriptionResult | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("recording");
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
-  useEffect(() => {
-    // Register hotkey on mount
-    hotkeyManager.register(handleHotkeyPress);
-
-    // Cleanup on unmount
-    return () => {
-      hotkeyManager.unregister();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hotkeyManager]);
-
-  const handleHotkeyPress = async () => {
+  const handleRecordToggle = async () => {
     try {
       if (audioRecorder.isRecording()) {
         // Stop recording
@@ -99,7 +91,7 @@ function App() {
   };
 
   return (
-    <div className="flex h-screen bg-secondary-bg">
+    <div className="flex h-screen bg-secondary-bg max-md:flex-col">
       <HistorySidebar
         key={refreshKey}
         selectedDate={selectedDate}
@@ -109,20 +101,22 @@ function App() {
       />
       <div className="flex-1 flex flex-col overflow-hidden">
         {viewMode === "recording" ? (
-          <div className="flex-1 flex flex-col items-center justify-center p-8">
+          <div className="flex-1 flex flex-col items-center justify-center p-8 max-md:p-4">
             <div className="flex flex-col items-center gap-6 w-full max-w-3xl">
               <div className="text-center space-y-3">
-                <h1 className="text-heading-lg font-semibold text-foreground">
+                <h1 className="text-heading-lg font-semibold text-foreground max-md:text-heading-md">
                   Voice Clipboard
                 </h1>
-                <p className="text-body text-muted-foreground">
-                  Press{" "}
-                  <kbd className="px-2 py-1 bg-background rounded-md border border-border text-small font-mono">
-                    Alt+1
-                  </kbd>{" "}
-                  to start/stop recording
+                <p className="text-body text-muted-foreground max-md:text-small">
+                  Tap the button below to start recording
                 </p>
               </div>
+
+              <RecordButton
+                status={status}
+                onToggle={handleRecordToggle}
+                disabled={status === "transcribing"}
+              />
 
               <StatusIndicator status={status} />
 
@@ -175,7 +169,11 @@ function App() {
           </div>
         ) : (
           <div className="flex-1 overflow-hidden">
-            <HistoryView key={refreshKey} date={selectedDate} refreshTrigger={refreshKey} />
+            <HistoryView
+              key={refreshKey}
+              date={selectedDate}
+              refreshTrigger={refreshKey}
+            />
           </div>
         )}
       </div>
@@ -184,3 +182,4 @@ function App() {
 }
 
 export default App;
+
