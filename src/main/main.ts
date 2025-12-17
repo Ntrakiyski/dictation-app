@@ -7,7 +7,6 @@ import dotenv from "dotenv";
 dotenv.config();
 
 let mainWindow: BrowserWindow | null = null;
-let dbService: DatabaseService | null = null;
 
 const HOTKEY = "Alt+1";
 const MONGODB_CONNECTION_STRING = process.env.MONGODB_CONNECTION_STRING || "";
@@ -63,15 +62,6 @@ function createWindow() {
 app.whenReady().then(async () => {
   createWindow();
 
-  // Initialize database service
-  try {
-    dbService = new DatabaseService(MONGODB_CONNECTION_STRING, DB_NAME);
-    await dbService.connect();
-    console.log("MongoDB connected successfully");
-  } catch (error) {
-    console.error("Failed to connect to MongoDB:", error);
-  }
-
   // Register IPC handler for clipboard
   ipcMain.handle("clipboard:writeText", (_event, text: string) => {
     try {
@@ -80,64 +70,6 @@ app.whenReady().then(async () => {
     } catch (error) {
       console.error("Clipboard write failed:", error);
       return { success: false, error: error instanceof Error ? error.message : "Unknown error" };
-    }
-  });
-
-  // Register IPC handlers for database operations
-  ipcMain.handle("db:saveTranscription", async (_event, data: {
-    text: string;
-    duration: number;
-    cost: number;
-    timestamp: Date;
-    date?: string;
-  }) => {
-    try {
-      if (!dbService) {
-        throw new Error("Database service not initialized");
-      }
-      const result = await dbService.saveTranscription({
-        ...data,
-        timestamp: new Date(data.timestamp),
-      });
-      return { success: true, data: result };
-    } catch (error) {
-      console.error("Failed to save transcription:", error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-      };
-    }
-  });
-
-  ipcMain.handle("db:getHistoryDays", async () => {
-    try {
-      if (!dbService) {
-        throw new Error("Database service not initialized");
-      }
-      const days = await dbService.getHistoryDays();
-      return { success: true, data: days };
-    } catch (error) {
-      console.error("Failed to get history days:", error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-      };
-    }
-  });
-
-  ipcMain.handle("db:getTranscriptionsByDay", async (_event, date: string) => {
-    try {
-      if (!dbService) {
-        throw new Error("Database service not initialized");
-      }
-      const transcriptions = await dbService.getTranscriptionsByDay(date);
-      return { success: true, data: transcriptions };
-    } catch (error) {
-      console.error("Failed to get transcriptions:", error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : "Unknown error",
-      };
     }
   });
 
@@ -159,11 +91,8 @@ app.whenReady().then(async () => {
   });
 });
 
-app.on("will-quit", async () => {
+app.on("will-quit", () => {
   globalShortcut.unregisterAll();
-  if (dbService) {
-    await dbService.disconnect();
-  }
 });
 
 app.on("window-all-closed", () => {

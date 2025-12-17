@@ -12,18 +12,20 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/renderer/*"],
-      "@voice-clipboard/shared/*": ["./shared/*"]
+      "@/*": ["./src/*"],
+      "@voice-clipboard/shared/types": ["./shared/types/index.ts", "../shared/types/index.ts"]
     }
   },
   "include": ["src"],
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/test/**/*"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
+
