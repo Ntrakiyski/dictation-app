@@ -28,10 +28,13 @@ app.use("/api/history", apiKeyAuth, historyRouter);
 app.use(errorHandler);
 
 // Initialize database service
-const mongoUri =
-  process.env.MONGODB_URI ||
-  "mongodb://root:vzIg4RDiKVsmvnBg2L1uHLnx0Mu8CKpWuH5bzJJKqOXVTmVJYb4ayARnmyL5ezee@159.69.35.245:7777/?directConnection=true";
+const mongoUri = process.env.MONGODB_URI;
 const dbName = process.env.DB_NAME || "voice_clipboard";
+
+if (!mongoUri) {
+  console.error("MONGODB_URI environment variable is required");
+  process.exit(1);
+}
 
 const dbService = new DatabaseService(mongoUri, dbName);
 
