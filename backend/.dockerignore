@@ -1,0 +1,10 @@
+node_modules
+dist
+.env
+*.log
+*.test.ts
+*.spec.ts
+__tests__
+coverage
+.vitest
+
