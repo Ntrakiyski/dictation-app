@@ -1,8 +1,8 @@
 import { Router, Request, Response } from "express";
 import multer from "multer";
 import { z } from "zod";
-import { transcribeAudio } from "../services/groq";
-import { DatabaseService } from "../services/database";
+import { transcribeAudio } from "../services/groq.js";
+import { DatabaseService } from "../services/database.js";
 
 const router = Router();
 const upload = multer({
@@ -67,4 +67,3 @@ router.post(
 );
 
 export default router;
-

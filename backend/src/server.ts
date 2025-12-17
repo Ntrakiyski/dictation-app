@@ -1,12 +1,12 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { DatabaseService } from "./services/database";
-import { apiKeyAuth } from "./middleware/auth";
-import { errorHandler } from "./middleware/errorHandler";
-import transcribeRouter from "./routes/transcribe";
-import historyRouter from "./routes/history";
-import healthRouter from "./routes/health";
+import { DatabaseService } from "./services/database.js";
+import { apiKeyAuth } from "./middleware/auth.js";
+import { errorHandler } from "./middleware/errorHandler.js";
+import transcribeRouter from "./routes/transcribe.js";
+import historyRouter from "./routes/history.js";
+import healthRouter from "./routes/health.js";
 
 dotenv.config();
 
@@ -67,4 +67,3 @@ process.on("SIGINT", async () => {
 });
 
 startServer();
-

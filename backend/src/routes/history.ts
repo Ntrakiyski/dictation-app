@@ -1,5 +1,5 @@
 import { Router, Request, Response } from "express";
-import { DatabaseService } from "../services/database";
+import { DatabaseService } from "../services/database.js";
 
 const router = Router();
 
@@ -95,4 +95,3 @@ router.post("/", async (req: Request, res: Response, next) => {
 });
 
 export default router;
-
