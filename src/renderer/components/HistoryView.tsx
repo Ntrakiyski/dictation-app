@@ -17,6 +17,8 @@ export function HistoryView({ date, refreshTrigger }: HistoryViewProps) {
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastCheckedAt, setLastCheckedAt] = useState<Date | null>(null);
+  const [secondsAgo, setSecondsAgo] = useState<number>(0);
 
   const loadTranscriptions = async () => {
     if (!date) {
@@ -37,18 +39,51 @@ export function HistoryView({ date, refreshTrigger }: HistoryViewProps) {
             : t.timestamp,
       }));
       setTranscriptions(processed);
+      setLastCheckedAt(new Date());
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to load transcriptions"
       );
+      setLastCheckedAt(new Date());
     } finally {
       setLoading(false);
     }
   };
 
+  // Load transcriptions when date or refreshTrigger changes
   useEffect(() => {
     loadTranscriptions();
   }, [date, refreshTrigger]);
+
+  // Auto-polling every 3 seconds when viewing history
+  useEffect(() => {
+    if (!date) return;
+
+    const intervalId = setInterval(() => {
+      loadTranscriptions();
+    }, 3000);
+
+    return () => clearInterval(intervalId);
+  }, [date]);
+
+  // Update "seconds ago" display every second
+  useEffect(() => {
+    if (!lastCheckedAt) return;
+
+    const updateSecondsAgo = () => {
+      const now = new Date();
+      const diff = Math.floor((now.getTime() - lastCheckedAt.getTime()) / 1000);
+      setSecondsAgo(diff);
+    };
+
+    // Update immediately
+    updateSecondsAgo();
+
+    // Then update every second
+    const intervalId = setInterval(updateSecondsAgo, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [lastCheckedAt]);
 
   if (!date) {
     return (
@@ -94,6 +129,14 @@ export function HistoryView({ date, refreshTrigger }: HistoryViewProps) {
     ? transcriptions.slice(1)
     : transcriptions;
 
+  // Format the "last checked" text
+  const getLastCheckedText = () => {
+    if (!lastCheckedAt) return null;
+    if (secondsAgo === 0) return "just now";
+    if (secondsAgo === 1) return "1 second ago";
+    return `${secondsAgo} seconds ago`;
+  };
+
   return (
     <div className="h-full flex flex-col">
       {/* Header with refresh button */}
@@ -101,15 +144,22 @@ export function HistoryView({ date, refreshTrigger }: HistoryViewProps) {
         <h2 className="text-heading-md font-semibold text-foreground">
           {isToday ? "Today" : date}
         </h2>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={loadTranscriptions}
-          className="h-8 w-8"
-          disabled={loading}
-        >
-          <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-        </Button>
+        <div className="flex flex-col items-end gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={loadTranscriptions}
+            className="h-8 w-8"
+            disabled={loading}
+          >
+            <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
+          </Button>
+          {lastCheckedAt && (
+            <span className="text-xs text-muted-foreground">
+              Last checked {getLastCheckedText()}
+            </span>
+          )}
+        </div>
       </div>
 
       <ScrollArea className="flex-1">
@@ -152,4 +202,3 @@ export function HistoryView({ date, refreshTrigger }: HistoryViewProps) {
     </div>
   );
 }
-

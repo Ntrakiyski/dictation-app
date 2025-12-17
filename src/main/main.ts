@@ -1,9 +1,22 @@
 import { app, BrowserWindow, globalShortcut, ipcMain, clipboard } from "electron";
 import path from "path";
+import { DatabaseService } from "./services/database";
+import dotenv from "dotenv";
+
+// Load environment variables from .env file
+dotenv.config();
 
 let mainWindow: BrowserWindow | null = null;
 
 const HOTKEY = "Alt+1";
+const MONGODB_CONNECTION_STRING = process.env.MONGODB_CONNECTION_STRING || "";
+const DB_NAME = process.env.DB_NAME || "voice_clipboard";
+
+// Validate required environment variables
+if (!MONGODB_CONNECTION_STRING) {
+  console.error("ERROR: MONGODB_CONNECTION_STRING environment variable is not set");
+  app.quit();
+}
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -87,4 +100,3 @@ app.on("window-all-closed", () => {
     app.quit();
   }
 });
-
