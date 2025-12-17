@@ -25,6 +25,7 @@ npm install
 
 ### Running
 
+**Backend:**
 ```bash
 npm run dev
 ```

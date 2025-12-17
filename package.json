@@ -2,24 +2,33 @@
   "name": "voice-clipboard",
   "version": "1.0.0",
   "description": "Desktop app that records audio on hotkey, transcribes via Groq API, and copies to clipboard",
-  "main": "out/main/main.js",
-  "type": "module",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "web-app",
+    "shared"
+  ],
   "scripts": {
-    "dev": "electron-vite dev",
-    "build": "electron-vite build",
-    "preview": "electron-vite preview",
-    "test:unit": "vitest run",
-    "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
-    "lint": "eslint . --ext .ts,.tsx",
-    "format": "prettier --write \"src/**/*.{ts,tsx,json}\""
+    "dev:electron": "cd electron-app && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:web": "cd web-app && npm run dev",
+    "build:electron": "cd electron-app && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "build:web": "cd web-app && npm run build",
+    "test:backend": "cd backend && npm test",
+    "test:web": "cd web-app && npm test",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:build": "docker-compose build",
+    "docker:logs": "docker-compose logs -f"
   },
   "keywords": [
     "electron",
     "react",
     "voice-recording",
     "transcription",
-    "clipboard"
+    "clipboard",
+    "pwa"
   ],
   "author": "",
   "license": "MIT",
